@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1020790405705",
+    "project_id": "learn-v-mobile",
+    "storage_bucket": "learn-v-mobile.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1020790405705:android:e49dc6097fea71cc14dd98",
+        "android_client_info": {
+          "package_name": "com.example.learnvmobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1020790405705-en7d2s0011c6ieth4ldiuq4hfv8hiab8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAAjkKZCzhw0As1HuUBCy7MtB0OxklsHds"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1020790405705-en7d2s0011c6ieth4ldiuq4hfv8hiab8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,211 @@
+package com.example.learnvmobile.screens
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Book
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.rememberTopAppBarState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import com.example.learnvmobile.R
+import com.example.learnvmobile.presentation.MainViewModel
+import com.example.learnvmobile.presentation.common.SubjectCard
+import com.example.learnvmobile.presentation.common.TopBar
+import kotlinx.coroutines.launch
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HomeScreen(
+    mainViewModel: MainViewModel,
+    navController: NavHostController,
+    userId: Int,
+    onBack:() -> Unit // Make it logout
+) {
+
+    val username = mainViewModel.user.fullName
+
+    val currentUser = mainViewModel.user.email
+
+    // for Navigation drawer
+    val drawerState = rememberDrawerState(
+        initialValue = DrawerValue.Closed
+    )
+
+    val scope = rememberCoroutineScope()
+
+    // For top Bar
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
+        state = rememberTopAppBarState()
+    )
+
+    LaunchedEffect(
+        key1 = true,
+        block = { mainViewModel.getUserById(id = userId) }
+    )
+
+    Scaffold { paddingValues ->
+        ModalNavigationDrawer(
+            drawerState = drawerState,
+            drawerContent = {
+                ModalDrawerSheet() {
+                    DrawerContent(mainViewModel = mainViewModel)
+                }
+            }
+        ) {
+            Scaffold (
+                topBar = {
+                    TopBar(
+                        onOpenDrawer = {
+                            scope.launch{
+                                drawerState.apply {
+                                    if (isClosed) open() else close()
+                                }
+                            }
+                        },
+                        scrollBehavior = scrollBehavior,
+                        navController = navController
+                    )
+
+                },
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .nestedScroll(scrollBehavior.nestedScrollConnection)
+            ) { paddingValues ->
+                ScreenContent(paddingValues)
+            }
+        }// end of ModalNavigationDrawer
+
+    }
+
+}
+
+
+// Only Temporary but these should be the subjects
+@Composable
+fun ScreenContent(paddingValues: PaddingValues) {
+    LazyColumn (modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        contentPadding = PaddingValues(
+            top = paddingValues.calculateTopPadding() + 16.dp
+        )
+    ){
+        item {
+            // Put the subject cards here
+            SubjectCard(painter = painterResource(id = R.drawable.mathsmol), subjectName = "Math")
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+        item {
+            // Put the subject cards here
+            SubjectCard(painter = painterResource(id = R.drawable.pesmol), subjectName = "PE")
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+        item {
+            // Put the subject cards here
+            SubjectCard(painter = painterResource(id = R.drawable.ppopsmol), subjectName = "Philippine Pop Culture")
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+        item {
+            // Put the subject cards here
+            SubjectCard(painter = painterResource(id = R.drawable.utselfsmol), subjectName = "Understanding the Self")
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+        item {
+            // Put the subject cards here
+            SubjectCard(painter = painterResource(id = R.drawable.contemporaryworldsmol), subjectName = "Contemporary World")
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+        item {
+            // Put the subject cards here
+            SubjectCard(painter = painterResource(id = R.drawable.languangeandcsmol), subjectName = "Language and Communication")
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+    }
+}
+
+@Composable
+fun DrawerContent(modifier: Modifier = Modifier, mainViewModel: MainViewModel) {
+    Text(text = "Welcome ${mainViewModel.user.fullName}",
+        fontSize = 17.sp,
+        modifier = Modifier.padding(16.dp))
+
+    HorizontalDivider()
+
+    NavigationDrawerItem(
+        icon = {
+            Icon(
+                imageVector = Icons.Rounded.Book,
+                contentDescription = "Subject 1"
+            )
+        },
+        label = {
+            Text(text = "Subject 1",
+                fontSize = 17.sp,
+                modifier = Modifier.padding(16.dp))
+        },
+        selected = false,
+        onClick = {  }
+    )
+
+    Spacer(modifier = Modifier.height( 8.dp ))
+
+    NavigationDrawerItem(
+        icon = {
+            Icon(
+                imageVector = Icons.Rounded.Book,
+                contentDescription = "Subject 2"
+            )
+        },
+        label = {
+            Text(text = "Subject 2",
+                fontSize = 17.sp,
+                modifier = Modifier.padding(16.dp))
+        },
+        selected = false,
+        onClick = {  }
+    )
+
+    Spacer(modifier = Modifier.height( 8.dp ))
+
+    NavigationDrawerItem(
+        icon = {
+            Icon(
+                imageVector = Icons.Rounded.Book,
+                contentDescription = "Subject 3"
+            )
+        },
+        label = {
+            Text(text = "Subject 3",
+                fontSize = 17.sp,
+                modifier = Modifier.padding(16.dp))
+        },
+        selected = false,
+        onClick = {  }
+    )
+}

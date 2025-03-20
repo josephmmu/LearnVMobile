@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">NewLearnVerse</string>
+
+    <string name="login">Login</string>
+    <string name="hello">Hey, There</string>
+
+    <string name="title_placeholder">Hey, There</string>
+    <string name="email_textField">Email</string>
+    <string name="password_textField">Password</string>
+
+    <string name="show_password">Show Password</string>
+    <string name="hide_password">Hide Password</string>
+
+    <string name="btn_login">Login</string>
+
+</resources>
