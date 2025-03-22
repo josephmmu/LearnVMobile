@@ -1,16 +1,20 @@
 package com.example.learnvmobile.presentation
 
+import android.app.Activity
 import android.content.res.Resources
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.learnvmobile.MainActivity
 import com.example.learnvmobile.data.repository.UserRepository
 import com.example.learnvmobile.di.Resource
 import com.example.learnvmobile.domain.model.User
+import com.example.learnvmobile.google.GoogleAuthClient
 import com.google.firebase.auth.FirebaseUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -19,12 +23,20 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Date
 import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val repository: UserRepository
+    private val repository: UserRepository,
+    private val googleAuthClient: GoogleAuthClient,
 ) : ViewModel() {
+
+    init {
+        viewModelScope.launch {
+            googleAuthClient.signOut()
+        }
+    }
 
     var user by mutableStateOf(User(0,"","","", "", ""))
         private set
@@ -36,6 +48,37 @@ class MainViewModel @Inject constructor(
     // For firebase
     private val _userState = MutableStateFlow<Resource<User>>(Resource.Loading())
     val userState: StateFlow<Resource<User>> = _userState
+
+    // for google Signin??
+    private val _loginState = mutableStateOf<Boolean?>(null)
+    val loginState: State<Boolean?> = _loginState
+
+    // Trying something else for googleSignIn
+    fun signIn(activity: Activity, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            val userFromFirebase = googleAuthClient.signIn(activity)
+            
+            if (userFromFirebase != null){
+                val user = User(
+                    id = 0,
+                    fullName = userFromFirebase.displayName ?: "",
+                    email = userFromFirebase.email ?:"",
+                    password = "",
+                    courseID = "",
+                    authProvider = "Google",
+                    createdAt = Date()
+                )
+
+                repository.insertUser(user)
+                onResult(true)
+            } else {
+                onResult(false)
+            }
+            
+
+
+        }
+    }
 
     var getAllUsers = repository.getAllUsers()
 
@@ -53,7 +96,7 @@ class MainViewModel @Inject constructor(
             val existingUser = repository.getUserByEmail(user.email)
             if (existingUser == null) {
                 val insertedId: Long = repository.insertUser(user)
-                repository.insertUser(user = user)
+                //repository.insertUser(user = user)
                 _user.value = user
                 withContext(Dispatchers.Main) {onUserInserted(insertedId)}
             } else {
@@ -61,6 +104,21 @@ class MainViewModel @Inject constructor(
             }
         }
     }
+
+    fun checkUserExists(email : String, onUserExists: (User) -> Unit, onUserNotFound: () -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val user = repository.getUserByEmail(email)
+            withContext(Dispatchers.Main) {
+                if (user != null) {
+                    onUserExists(user)
+                } else {
+                    onUserNotFound()
+                }
+            }
+        }
+    }
+
+
 
     fun updateUser(user: User) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -111,31 +169,12 @@ class MainViewModel @Inject constructor(
 
     fun updateName(fullName: String) {
         viewModelScope.launch(Dispatchers.IO) {
-//            _user.value?.let {currentUser ->
-//                val updatedUser = currentUser.copy(fullName = fullName, courseID = courseId)
-//                repository.updateUser(updatedUser)
-//                _user.value = updatedUser
-//
-//            }
             user = user.copy(fullName = fullName)
-
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun loginWithGoogle(idToken : String) {
-        viewModelScope.launch {
-            val user = repository.loginWithGoogle(idToken)
-            _userState.value = if (user != null) Resource.Success(user) else Resource.Error("Login Failed")
-        }
-    }
 
-    fun logout() {
-        viewModelScope.launch {
-            repository.logout()
-            _userState.value = Resource.Success(null)
-        }
-    }
+
 
 
 

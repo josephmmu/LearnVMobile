@@ -206,8 +206,6 @@ fun SetupScreen(
             }
 
 
-            //mainViewModel.updateUser(mainViewModel.user)
-
         }
         ) {
 

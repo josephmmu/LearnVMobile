@@ -1,21 +1,29 @@
 package com.example.learnvmobile.presentation.navigation
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.learnvmobile.google.GoogleAuthClient
 import com.example.learnvmobile.presentation.MainViewModel
 import com.example.learnvmobile.screens.HomeScreen
 import com.example.learnvmobile.screens.LoginScreen
 import com.example.learnvmobile.screens.SetupScreen
 import com.example.learnvmobile.utils.Routes
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppNavigation(mainViewModel: MainViewModel) {
     val navController = rememberNavController()
+
+
 
     NavHost(
         navController = navController,
@@ -26,12 +34,9 @@ fun AppNavigation(mainViewModel: MainViewModel) {
         composable(route = Screen.LoginScreen.name) {
             LoginScreen(
                 mainViewModel = mainViewModel,
-                onLogin = {userId ->
-                    navController.navigate("${Screen.HomeScreen.name}/$userId")
-                },
-                toRegister = {userId ->
-                    navController.navigate("${Screen.SetupScreen.name}/$userId")
-                }
+                onLogin = {userId -> navController.navigate("${Screen.HomeScreen.name}/$userId") },
+                toRegister = {userId -> navController.navigate("${Screen.SetupScreen.name}/$userId") },
+                onSignInSuccess = {navController.navigate(Screen.HomeScreen)}
                 )}
 
         // FROM SetupScreen TO Home Screen

@@ -1,6 +1,12 @@
 package com.example.learnvmobile.screens
 
+import android.app.Activity
+import android.os.Build
+import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,18 +19,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -35,16 +45,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.learnvmobile.R
 import com.example.learnvmobile.domain.model.User
+import com.example.learnvmobile.google.GoogleAuthClient
 import com.example.learnvmobile.presentation.MainViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun LoginScreen(
     mainViewModel: MainViewModel,
     onLogin:(id : Int) -> Unit,
     toRegister:(id : Int) -> Unit,
+    onSignInSuccess: () -> Unit
 ) {
 
     val context = LocalContext.current
+    val activity = context as? Activity
 
     var email by remember { mutableStateOf("") }
     val isEmailValid = email.isNotEmpty() && email.contains('@')
@@ -55,6 +69,8 @@ fun LoginScreen(
     var wasPasswordTouched by remember { mutableStateOf(false) }
 
     val user = User(0, "", email, password, "", "")
+
+    val loginState by mainViewModel.loginState
 
     Column(modifier = Modifier
         .fillMaxSize()
@@ -67,7 +83,9 @@ fun LoginScreen(
                 painter = painterResource(R.drawable.logo),
                 contentDescription = "Logo",
                 contentScale = ContentScale.FillHeight,
-                modifier = Modifier.fillMaxWidth().fillMaxWidth(0.25f)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxWidth(0.25f)
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -126,24 +144,21 @@ fun LoginScreen(
             Button (
                 onClick = {
                     if (isEmailValid && isPasswordValid) {
-
-
-
-                        mainViewModel.insertUserIfNotExists(
-                            user = user,
-                            onUserExists = {
-                                Toast.makeText(context, "User already exists!", Toast.LENGTH_SHORT).show()
-                                onLogin(user.id)
+                        mainViewModel.checkUserExists(
+                            email = email,
+                            onUserExists = { user ->
+                                if (user.password == password) { // Add password check
+                                    onLogin(user.id)
+                                } else {
+                                    Toast.makeText(context, "Incorrect password!", Toast.LENGTH_SHORT).show()
+                                }
                             },
-                            onUserInserted = {
-                                println("User inserted successfully")
-                                onLogin(user.id)
+                            onUserNotFound = {
+                                Toast.makeText(context, "User not found! Please register.", Toast.LENGTH_LONG).show()
                             }
                         )
-                    } else{
-                        println(isEmailValid)
-                        println(isPasswordValid)
-                        Toast.makeText(context,"Are you even trying?", Toast.LENGTH_LONG).show()
+                    } else {
+                        Toast.makeText(context, "Invalid email or password!", Toast.LENGTH_LONG).show()
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
@@ -165,10 +180,32 @@ fun LoginScreen(
                 Text(text= "No account? Register now pls")
             }
 
+            Button(
+                //onClick = { launcher.launch(signInClient.signInIntent) },
+//                onClick = {launchGoogleSignIn(activity)},
+                onClick = {
+                    activity?.let {
+                        mainViewModel.signIn(it) { success ->
+                            if (success) {
+                                println("Sign-in yay")
+                            } else {
+                                println(" Google Sign-In Failed")
+                            }
+                        }
+                    }
+                          },
+                colors = ButtonDefaults.buttonColors(Color.Red)
+            ) {
+                Text(text = "Sign in with Google", color = Color.White)
+            }
+
             // DELETE ALL USERS
             Button (onClick = {mainViewModel.deleteAllUsers()},modifier = Modifier.fillMaxWidth()) { Text(text = "Delete alllllll the users", fontSize = 17.sp, modifier = Modifier.padding(vertical = 8.dp))}
 
-        }
-    }
+
+
+
+        }// Baby Column
+    } // Parent Column
 
 }
