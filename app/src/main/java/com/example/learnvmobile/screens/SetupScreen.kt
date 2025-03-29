@@ -1,5 +1,6 @@
 package com.example.learnvmobile.screens
 
+import android.graphics.Paint.Style
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -8,9 +9,15 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -27,16 +34,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.learnvmobile.R
 import com.example.learnvmobile.domain.model.User
 import com.example.learnvmobile.presentation.MainViewModel
 import com.example.learnvmobile.presentation.common.CourseDropDown
-
 
 @Composable
 fun SetupScreen(
@@ -57,27 +68,35 @@ fun SetupScreen(
     var passwordTest by remember { mutableStateOf("") }
 
     val isPasswordValid = password.isNotEmpty() && password.length >= 8
-    val isPasswordTestValid = passwordTest.isNotEmpty() && passwordTest.length >= 8
+    val isPasswordTestValid = passwordTest.isNotEmpty() && passwordTest.length >= 8 && passwordTest == password
 
     var wasPasswordTouched by remember { mutableStateOf(false) }
     var wasPasswordTestTouched by remember { mutableStateOf(false) }
 
-    val user = User(0, fullName, email, password, courseID, "")
+    val passwordTestV = remember { mutableStateOf(false)}
+
+    val user = User(0, fullName, email, password, courseID, "Manual")
 
     // We might not need this, maybe for the Home screen
 //    LaunchedEffect(
 //        key1 = true,
 //        block = { mainViewModel.getUserById(id = userId) }
 //    )
-
-
     Column (
         modifier = Modifier
             .fillMaxSize()
+            .padding(horizontal = 20.dp)
             .imePadding(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
     ) {
+
+        Text(
+            text = "Register Your Account",
+            fontStyle = FontStyle.Normal,
+            fontSize = 30.sp)
+
+        Spacer(modifier = Modifier.size(50.dp))
 
         // Full name and Course
         Row(
@@ -131,17 +150,13 @@ fun SetupScreen(
         Spacer(modifier = Modifier.size(50.dp))
 
         // Password and Validation
-        Row(
-            modifier = Modifier,
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = password,
                 onValueChange = {password = it ; wasPasswordTouched = true},
                 placeholder =  {Text(text = "Go0dp@ssword")},
                 label = {Text(text = "Password")},
+                visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 singleLine = true,
                 isError = wasPasswordTouched && !isPasswordValid,
@@ -163,8 +178,13 @@ fun SetupScreen(
                 value = passwordTest,
                 onValueChange = {passwordTest = it ; wasPasswordTestTouched = true},
                 placeholder =  {Text(text = "Go0dp@ssword")},
-                label = {Text(text = "Password")},
-                visualTransformation = PasswordVisualTransformation(),
+                label = {Text(text = "Confirm Password")},
+                visualTransformation =
+                    if (passwordTestV.value) {
+                        PasswordVisualTransformation()
+                    } else {
+                        VisualTransformation.None
+                    },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 singleLine = true,
                 isError = wasPasswordTestTouched && !isPasswordTestValid,
@@ -173,19 +193,31 @@ fun SetupScreen(
                     if (wasPasswordTestTouched && !isPasswordTestValid) {
                         Text(
                             modifier = Modifier.fillMaxWidth(),
-                            text = "Make it at least 8 characters, guy",
+                            text = "Just re-enter the password :/",
                             color = MaterialTheme.colorScheme.error)
+                    }
+                },
+                trailingIcon = {
+                    val iconImage = if(passwordTestV.value) {
+                        Icons.Filled.Visibility
+                    } else {
+                        Icons.Filled.VisibilityOff
+                    }
+
+                    val description = if (passwordTestV.value) {
+                        stringResource(id = R.string.hide_password)
+                    } else {
+                        stringResource(id = R.string.show_password)
+                    }
+                    IconButton(onClick = {passwordTestV.value = !passwordTestV.value}) {
+                        Icon(imageVector = iconImage, contentDescription = description)
                     }
                 }
             )
-        }
 
-        Spacer(modifier = Modifier.size(20.dp))
-
-        Spacer(modifier = Modifier.size(30.dp))
+        Spacer(modifier = Modifier.size(50.dp))
 
         Button(onClick = {
-
             if (isEmailValid && isPasswordValid) {
                 mainViewModel.insertUserIfNotExists(
                     user = user,
@@ -196,7 +228,6 @@ fun SetupScreen(
                     onUserInserted = {insertedId ->
                         println("User inserted successfully with ID: $insertedId")
                         onRegister(insertedId.toInt()) // Pass the correct ID
-
                     }
                 )
             } else{
@@ -204,19 +235,11 @@ fun SetupScreen(
                 println(isPasswordValid)
                 Toast.makeText(context,"Are you even trying?", Toast.LENGTH_LONG).show()
             }
-
-
         }
         ) {
-
             Text(text = "Finish Registering")
-
         }
-
         Spacer(modifier = Modifier.size(30.dp))
-
-
-
     }
 
 }

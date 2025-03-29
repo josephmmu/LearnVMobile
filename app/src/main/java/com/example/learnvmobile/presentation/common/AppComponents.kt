@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -57,6 +58,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
@@ -484,4 +486,24 @@ fun CourseDropDown() :String {
 
 
 
+}
+
+@Composable
+fun GoogleSignInButton(
+    onClick: () -> Unit
+) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .size(60.dp) // Adjust size as needed
+            .clip(CircleShape) // Make it wrap around
+            .background(colorResource(R.color.orange_normal)) // Orange color
+            .clickable { onClick() }
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.google), // Use your Google logo drawable
+            contentDescription = "Google Sign-In",
+            modifier = Modifier.size(32.dp) // Adjust image size as needed
+        )
+    }
 }

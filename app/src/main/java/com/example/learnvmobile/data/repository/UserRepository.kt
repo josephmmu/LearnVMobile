@@ -15,7 +15,6 @@ import javax.inject.Inject
 class UserRepository @Inject constructor(
     private val dao : UserDao
 ) {
-
     suspend fun insertUser(user : User): Long = dao.insertUser(user = user)
 
     suspend fun updateUser(user : User) = dao.updateUser(user = user)

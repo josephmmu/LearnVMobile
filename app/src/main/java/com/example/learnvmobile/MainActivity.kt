@@ -53,14 +53,6 @@ class MainActivity : ComponentActivity() {
         setContent {
             LearnVMobileTheme {
 
-//                var isSignIn by rememberSaveable {
-//                    mutableStateOf(googleAuthClient.isSignedIn())
-//                }
-
-//                lifecycleScope.launch {
-//                    mainViewModel.signIn(this@MainActivity)
-//                }
-
                 AppNavigation(
                     mainViewModel = mainViewModel,
                 )

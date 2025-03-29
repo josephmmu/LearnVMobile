@@ -83,6 +83,7 @@ dependencies {
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth.ktx)
+    implementation(libs.firebase.firestore)
 
     //navController
     implementation(libs.androidx.navigation.compose)

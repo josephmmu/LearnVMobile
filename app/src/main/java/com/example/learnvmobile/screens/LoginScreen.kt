@@ -10,6 +10,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -34,19 +36,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.learnvmobile.R
 import com.example.learnvmobile.domain.model.User
 import com.example.learnvmobile.google.GoogleAuthClient
 import com.example.learnvmobile.presentation.MainViewModel
+import com.example.learnvmobile.presentation.common.GoogleSignInButton
+import com.example.learnvmobile.presentation.common.componentShapes
+
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -70,7 +78,7 @@ fun LoginScreen(
 
     val user = User(0, "", email, password, "", "")
 
-    val loginState by mainViewModel.loginState
+    val firebaseUserLogin by mainViewModel.userStateFlow.collectAsState()
 
     Column(modifier = Modifier
         .fillMaxSize()
@@ -141,36 +149,64 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.size(40.dp))
 
-            Button (
-                onClick = {
-                    if (isEmailValid && isPasswordValid) {
-                        mainViewModel.checkUserExists(
-                            email = email,
-                            onUserExists = { user ->
-                                if (user.password == password) { // Add password check
-                                    onLogin(user.id)
-                                } else {
-                                    Toast.makeText(context, "Incorrect password!", Toast.LENGTH_SHORT).show()
-                                }
-                            },
-                            onUserNotFound = {
-                                Toast.makeText(context, "User not found! Please register.", Toast.LENGTH_LONG).show()
-                            }
-                        )
-                    } else {
-                        Toast.makeText(context, "Invalid email or password!", Toast.LENGTH_LONG).show()
-                    }
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = "Login",
-                    fontSize = 17.sp,
-                    modifier = Modifier.padding(vertical = 8.dp)
-                )
-            }
+            Row {
+//                GoogleSignInButton {
+//                    activity?.let {
+//                        mainViewModel.signIn(it) { success ->
+//                            if (success) {
+//                                println("Sign-in yay")
+//                                firebaseUserLogin?.let { it1 -> onLogin(it1.id) }
+//                            } else {
+//                                println(" Google Sign-In Failed")
+//                            }
+//                        }
+//                    }
+//                }
 
-            //Spacer(modifier = Modifier.size(50.dp))
+                GoogleSignInButton {
+                    activity?.let {
+                        mainViewModel.signIn(
+                            activity = it,
+                            onResult = { user ->
+                                println("USER NAME ${user.fullName}")
+                                println("USER ID ${user.id}")
+
+                                onLogin(user.id)
+                            },
+                            onUserExists = { Toast.makeText(context, "User cannot be signed in through google.", Toast.LENGTH_LONG).show() }
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.size(20.dp))
+
+                Button (
+                    onClick = {
+                        if (isEmailValid && isPasswordValid) {
+                            mainViewModel.checkUserExists(
+                                email = email,
+                                onUserExists = { user ->
+                                    if (user.password == password) { // Add password check
+                                        onLogin(user.id)
+                                    } else {
+                                        Toast.makeText(context, "Incorrect password!", Toast.LENGTH_SHORT).show()
+                                    } },
+                                onUserNotFound = {
+                                    Toast.makeText(context, "User not found! Please register.", Toast.LENGTH_LONG).show()
+                                } )
+                        } else {
+                            Toast.makeText(context, "Invalid email or password!", Toast.LENGTH_LONG).show()
+                        } },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(colorResource(R.color.orange_light))
+                ) {
+                    Text(
+                        text = "Login",
+                        fontSize = 17.sp,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                }
+            }
 
             TextButton(
                modifier = Modifier
@@ -180,29 +216,8 @@ fun LoginScreen(
                 Text(text= "No account? Register now pls")
             }
 
-            Button(
-                //onClick = { launcher.launch(signInClient.signInIntent) },
-//                onClick = {launchGoogleSignIn(activity)},
-                onClick = {
-                    activity?.let {
-                        mainViewModel.signIn(it) { success ->
-                            if (success) {
-                                println("Sign-in yay")
-                            } else {
-                                println(" Google Sign-In Failed")
-                            }
-                        }
-                    }
-                          },
-                colors = ButtonDefaults.buttonColors(Color.Red)
-            ) {
-                Text(text = "Sign in with Google", color = Color.White)
-            }
-
             // DELETE ALL USERS
             Button (onClick = {mainViewModel.deleteAllUsers()},modifier = Modifier.fillMaxWidth()) { Text(text = "Delete alllllll the users", fontSize = 17.sp, modifier = Modifier.padding(vertical = 8.dp))}
-
-
 
 
         }// Baby Column

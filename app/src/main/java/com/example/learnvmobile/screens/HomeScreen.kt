@@ -1,15 +1,19 @@
 package com.example.learnvmobile.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Book
+import androidx.compose.material3.Card
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -25,6 +29,9 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,12 +52,11 @@ fun HomeScreen(
     mainViewModel: MainViewModel,
     navController: NavHostController,
     userId: Int,
+    onCourseSelected: (String) -> Unit,
     onBack:() -> Unit // Make it logout
 ) {
 
-    val username = mainViewModel.user.fullName
-
-    val currentUser = mainViewModel.user.email
+    LaunchedEffect(Unit) {mainViewModel.loadCourses()}
 
     // for Navigation drawer
     val drawerState = rememberDrawerState(
@@ -97,7 +103,7 @@ fun HomeScreen(
                     .padding(paddingValues)
                     .nestedScroll(scrollBehavior.nestedScrollConnection)
             ) { paddingValues ->
-                ScreenContent(paddingValues)
+                ScreenContent(paddingValues, mainViewModel, onCourseSelected)
             }
         }// end of ModalNavigationDrawer
 
@@ -108,50 +114,51 @@ fun HomeScreen(
 
 // Only Temporary but these should be the subjects
 @Composable
-fun ScreenContent(paddingValues: PaddingValues) {
+fun ScreenContent(paddingValues: PaddingValues, mainViewModel: MainViewModel, onCourseSelected: (String) -> Unit) {
     LazyColumn (modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         contentPadding = PaddingValues(
             top = paddingValues.calculateTopPadding() + 16.dp
         )
     ){
-        item {
-            // Put the subject cards here
-            SubjectCard(painter = painterResource(id = R.drawable.mathsmol), subjectName = "Math")
-            Spacer(modifier = Modifier.height(16.dp))
+        items(mainViewModel.courses) { course ->
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+                    .clickable {
+                        onCourseSelected(course.courseId)
+                    }
+            ) {
+                Text (
+                    text = course.title,
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
         }
-        item {
-            // Put the subject cards here
-            SubjectCard(painter = painterResource(id = R.drawable.pesmol), subjectName = "PE")
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-        item {
-            // Put the subject cards here
-            SubjectCard(painter = painterResource(id = R.drawable.ppopsmol), subjectName = "Philippine Pop Culture")
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-        item {
-            // Put the subject cards here
-            SubjectCard(painter = painterResource(id = R.drawable.utselfsmol), subjectName = "Understanding the Self")
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-        item {
-            // Put the subject cards here
-            SubjectCard(painter = painterResource(id = R.drawable.contemporaryworldsmol), subjectName = "Contemporary World")
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-        item {
-            // Put the subject cards here
-            SubjectCard(painter = painterResource(id = R.drawable.languangeandcsmol), subjectName = "Language and Communication")
-            Spacer(modifier = Modifier.height(16.dp))
-        }
+
+//        item {
+//            // Put the subject cards here
+//            SubjectCard(painter = painterResource(id = R.drawable.mathsmol), subjectName = "Math")
+//            Spacer(modifier = Modifier.height(16.dp))
+//        }
+//        item {
+//            // Put the subject cards here
+//            SubjectCard(painter = painterResource(id = R.drawable.pesmol), subjectName = "PE")
+//            Spacer(modifier = Modifier.height(16.dp))
+//        }
 
     }
 }
 
 @Composable
 fun DrawerContent(modifier: Modifier = Modifier, mainViewModel: MainViewModel) {
-    Text(text = "Welcome ${mainViewModel.user.fullName}",
+
+
+    val user by remember { mutableStateOf(mainViewModel.user) }
+
+    Text(text = "Welcome ${user.fullName}",
         fontSize = 17.sp,
         modifier = Modifier.padding(16.dp))
 

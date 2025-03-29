@@ -14,6 +14,7 @@ import androidx.navigation.navArgument
 import com.example.learnvmobile.google.GoogleAuthClient
 import com.example.learnvmobile.presentation.MainViewModel
 import com.example.learnvmobile.screens.HomeScreen
+import com.example.learnvmobile.screens.LessonListScreen
 import com.example.learnvmobile.screens.LoginScreen
 import com.example.learnvmobile.screens.SetupScreen
 import com.example.learnvmobile.utils.Routes
@@ -62,8 +63,21 @@ fun AppNavigation(mainViewModel: MainViewModel) {
                 HomeScreen (userId = id!!,
                     mainViewModel = mainViewModel,
                     navController = navController,
-                    onBack = {navController.popBackStack()})
+                    onBack = {navController.popBackStack()},
+                    onCourseSelected = { courseId ->
+                        navController.navigate("${Screen.LessonScreen.name}/{userId}/{courseId}")
+                    })
             }
+        }
+
+        composable(
+            route = "${Screen.LessonScreen.name}/{userId}/{courseID}"
+        ) { backStackEntry ->
+            val userId = backStackEntry.arguments?.getInt("userId") ?: return@composable
+            val courseId = backStackEntry.arguments?.getString("courseId") ?: return@composable
+
+            LessonListScreen(mainViewModel, userId = userId, courseId = courseId)
+
         }
 
 

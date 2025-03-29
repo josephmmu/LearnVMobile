@@ -8,11 +8,18 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
+    <color name="orange_light">#FFC107</color>
+    <color name="orange_normal">#FF9800</color>
+    <color name="orange_deep">#FF5722</color>
+
+
     <color name="colorPrimary">#92A3FD</color>
     <color name="colorSecondary">#9DCEFF</color>
     <color name="colorText">#1D1617</color>
     <color name="colorAccent">#C58BF2</color>
     <color name="colorWhite">#FFFFFF</color>
     <color name="colorGray">#7B6F72</color>
+
+
 
 </resources>
