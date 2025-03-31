@@ -30,7 +30,7 @@ interface UserDao {
     @Query("DELETE FROM User")
     suspend fun deleteDallUsers()
 
-    @Query("SELECT * FROM User WHERE id =:id")
+    @Query("SELECT * FROM User WHERE id =:id LIMIT 1")
     suspend fun getUserById(id: Int): User
 
     @Query("SELECT * FROM User where email = :email")

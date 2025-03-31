@@ -3,6 +3,7 @@ package com.example.learnvmobile.presentation
 import android.app.Activity
 import android.content.res.Resources
 import android.os.Build
+import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.State
@@ -30,6 +31,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.util.Date
 import javax.inject.Inject
@@ -71,30 +73,56 @@ class MainViewModel @Inject constructor(
             val userFromFirebase = googleAuthClient.signIn(activity)
             
             if (userFromFirebase != null){
-                val user1 = User(
-                    id = 0,
-                    fullName = userFromFirebase.displayName ?: "",
-                    email = userFromFirebase.email ?:"",
-                    password = "",
-                    courseID = "",
-                    authProvider = "Google",
-                    createdAt = Date()
-                )
+                val email = userFromFirebase.email ?: ""
 
-                // The thing below should replace that
-                insertUserIfNotExists(
-                    user = user1,
-                    onUserExists = {
-                        Toast.makeText(activity, "User already exists!", Toast.LENGTH_SHORT).show()
-                        this@MainViewModel.user = user1
-                        onResult(user1)
-                    },
-                    onUserInserted = {insertedId ->
-                        println("User inserted successfully with ID: $insertedId")
-                        this@MainViewModel.user = user1
-                        onResult(user1)
+                val existingUser = repository.getUserByEmail(email)
+
+
+                if (existingUser != null) {
+                    println("User already exists in Room: ${existingUser.id}")
+                    this@MainViewModel.user = existingUser
+                    onResult(existingUser)
+                } else {
+                    val user1 = User(
+                        id = 0,
+                        fullName = userFromFirebase.displayName ?: "",
+                        email = email,
+                        password = "",
+                        courseID = "",
+                        authProvider = "Google",
+                        createdAt = Date()
+                    )
+
+                    val insertedId = repository.insertUser(user1).toInt()
+
+                    val insertedUser = repository.getUserById(insertedId)
+
+                    if (insertedUser != null) {
+                        println("New user inserted: ${insertedUser.fullName}, ID: ${insertedUser.id}")
+                        this@MainViewModel.user = insertedUser
+                        onResult(insertedUser)
                     }
-                )
+
+//                    // The thing below should replace that
+//                    insertUserIfNotExists(
+//                        user = user1,
+//                        onUserExists = {
+//                            Toast.makeText(activity, "User already exists!", Toast.LENGTH_SHORT).show()
+//                            this@MainViewModel.user = user1
+//                            onResult(user1)
+//                        },
+//                        onUserInserted = {insertedId ->
+//                            println("User inserted successfully with ID: $insertedId")
+//                            this@MainViewModel.user = user1
+//                            onResult(user1)
+//                        }
+//                    )
+
+                }
+
+
+
+
 
             } else {
                 onUserExists()
@@ -128,7 +156,6 @@ class MainViewModel @Inject constructor(
         }
     }
 
-
     fun checkUserExists(email : String, onUserExists: (User) -> Unit, onUserNotFound: () -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             val user = repository.getUserByEmail(email)
@@ -148,11 +175,18 @@ class MainViewModel @Inject constructor(
         }
     }
 
-
-
     fun getUserById(id : Int) {
         viewModelScope.launch(Dispatchers.IO) {
-            user = repository.getUserById(id = id)
+            val userFromDb = repository.getUserById(id)
+            Log.d("MainViewModel", "Querying user with ID: $id")  // Debug
+            Log.d("MainViewModel", "Fetched user: $userFromDb") // Debugging
+            user = userFromDb
+        }
+    }
+
+    fun getUserById2(id : Int): User {
+        return runBlocking {
+            repository.getUserById(id)
         }
     }
 
@@ -206,7 +240,6 @@ class MainViewModel @Inject constructor(
             userProgress = userProgress + (lessonId to true)
         }
     }
-
 
     // Not being used but should keep
 

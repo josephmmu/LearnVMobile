@@ -24,8 +24,6 @@ import com.example.learnvmobile.utils.Routes
 fun AppNavigation(mainViewModel: MainViewModel) {
     val navController = rememberNavController()
 
-
-
     NavHost(
         navController = navController,
         startDestination = Screen.LoginScreen.name
@@ -65,27 +63,29 @@ fun AppNavigation(mainViewModel: MainViewModel) {
                     navController = navController,
                     onBack = {navController.popBackStack()},
                     onCourseSelected = { courseId ->
-                        navController.navigate("${Screen.LessonScreen.name}/{userId}/{courseId}")
+                        navController.navigate("${Screen.LessonScreen.name}/$id/$courseId")
                     })
             }
         }
 
         composable(
-            route = "${Screen.LessonScreen.name}/{userId}/{courseID}"
+            route = "${Screen.LessonScreen.name}/{userId}/{courseId}"
         ) { backStackEntry ->
             val userId = backStackEntry.arguments?.getInt("userId") ?: return@composable
             val courseId = backStackEntry.arguments?.getString("courseId") ?: return@composable
 
-            LessonListScreen(mainViewModel, userId = userId, courseId = courseId)
+            LessonListScreen(
+                mainViewModel = mainViewModel,
+                userId = userId,
+                courseId = courseId,
+                onBack = {
+                    Log.d("LoginScreen", "Navigating to HomeScreen with userId: $userId")
 
+                    navController.navigate("${Screen.HomeScreen.name}/$userId") {
+                        popUpTo(Screen.HomeScreen.name) { inclusive = false }
+                    }
+                })
         }
-
-
-
-
-
-
-
-    }
+    } // end of navHost
 
 }

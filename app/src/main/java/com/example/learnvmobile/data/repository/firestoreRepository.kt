@@ -18,7 +18,6 @@ class firestoreRepository @Inject constructor(
             .collection("progress")
             .document(progress.courseId)
 
-
         docRef.set(progress)
 
 

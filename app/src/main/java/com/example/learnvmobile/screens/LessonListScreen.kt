@@ -17,10 +17,15 @@ import androidx.compose.ui.unit.sp
 import com.example.learnvmobile.presentation.MainViewModel
 
 @Composable
-fun LessonListScreen(mainViewModel: MainViewModel, userId: Int, courseId: String) {
+fun LessonListScreen(
+    mainViewModel: MainViewModel,
+    userId: Int,
+    courseId: String,
+    onBack:() -> Unit) {
     LaunchedEffect(courseId) {
         mainViewModel.loadLessons(courseId)
         mainViewModel.loadUserProgress(userId, courseId)
+        mainViewModel.getUserById(userId)
     }
 
     LazyColumn(

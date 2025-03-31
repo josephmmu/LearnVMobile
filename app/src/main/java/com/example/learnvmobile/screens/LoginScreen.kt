@@ -150,19 +150,6 @@ fun LoginScreen(
             Spacer(modifier = Modifier.size(40.dp))
 
             Row {
-//                GoogleSignInButton {
-//                    activity?.let {
-//                        mainViewModel.signIn(it) { success ->
-//                            if (success) {
-//                                println("Sign-in yay")
-//                                firebaseUserLogin?.let { it1 -> onLogin(it1.id) }
-//                            } else {
-//                                println(" Google Sign-In Failed")
-//                            }
-//                        }
-//                    }
-//                }
-
                 GoogleSignInButton {
                     activity?.let {
                         mainViewModel.signIn(

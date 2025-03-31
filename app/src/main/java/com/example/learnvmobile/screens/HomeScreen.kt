@@ -1,5 +1,6 @@
 package com.example.learnvmobile.screens
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -31,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -41,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.learnvmobile.R
+import com.example.learnvmobile.domain.model.User
 import com.example.learnvmobile.presentation.MainViewModel
 import com.example.learnvmobile.presentation.common.SubjectCard
 import com.example.learnvmobile.presentation.common.TopBar
@@ -58,6 +61,8 @@ fun HomeScreen(
 
     LaunchedEffect(Unit) {mainViewModel.loadCourses()}
 
+
+
     // for Navigation drawer
     val drawerState = rememberDrawerState(
         initialValue = DrawerValue.Closed
@@ -70,6 +75,11 @@ fun HomeScreen(
         state = rememberTopAppBarState()
     )
 
+    LaunchedEffect(userId) {
+        Log.d("HomeScreen", "Received userId: $userId")
+        mainViewModel.getUserById(userId)
+    }
+
     LaunchedEffect(
         key1 = true,
         block = { mainViewModel.getUserById(id = userId) }
@@ -80,7 +90,7 @@ fun HomeScreen(
             drawerState = drawerState,
             drawerContent = {
                 ModalDrawerSheet() {
-                    DrawerContent(mainViewModel = mainViewModel)
+                    DrawerContent(mainViewModel = mainViewModel, userId = userId)
                 }
             }
         ) {
@@ -138,6 +148,8 @@ fun ScreenContent(paddingValues: PaddingValues, mainViewModel: MainViewModel, on
             }
         }
 
+
+
 //        item {
 //            // Put the subject cards here
 //            SubjectCard(painter = painterResource(id = R.drawable.mathsmol), subjectName = "Math")
@@ -153,12 +165,23 @@ fun ScreenContent(paddingValues: PaddingValues, mainViewModel: MainViewModel, on
 }
 
 @Composable
-fun DrawerContent(modifier: Modifier = Modifier, mainViewModel: MainViewModel) {
+fun DrawerContent(modifier: Modifier = Modifier, mainViewModel: MainViewModel, userId: Int) {
 
 
-    val user by remember { mutableStateOf(mainViewModel.user) }
+    val user by produceState<User?>(initialValue = null) {
+        value = mainViewModel.getUserById2(userId)
+    }
 
-    Text(text = "Welcome ${user.fullName}",
+    if (user == null) {
+        Text("Loading user...")
+        return
+    }
+
+    Text(text = "Welcome ${user!!.fullName ?: "Guest"}",
+        fontSize = 17.sp,
+        modifier = Modifier.padding(16.dp))
+
+    Text(text = "User ID ${user!!.id}",
         fontSize = 17.sp,
         modifier = Modifier.padding(16.dp))
 
