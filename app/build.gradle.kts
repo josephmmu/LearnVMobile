@@ -84,6 +84,7 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth.ktx)
     implementation(libs.firebase.firestore)
+    implementation ("androidx.compose.material:material:1.6.0") // Use latest version
 
     //navController
     implementation(libs.androidx.navigation.compose)

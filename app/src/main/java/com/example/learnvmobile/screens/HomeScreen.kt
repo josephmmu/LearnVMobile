@@ -58,6 +58,7 @@ fun HomeScreen(
     onCourseSelected: (String) -> Unit,
     onBack:() -> Unit // Make it logout
 ) {
+
     LaunchedEffect(Unit) {mainViewModel.loadCourses()}
 
     // for Navigation drawer
@@ -115,7 +116,6 @@ fun HomeScreen(
     }
 }
 
-
 // Only Temporary but these should be the subjects
 @Composable
 fun ScreenContent(paddingValues: PaddingValues, mainViewModel: MainViewModel, onCourseSelected: (String) -> Unit) {
@@ -147,6 +147,7 @@ fun ScreenContent(paddingValues: PaddingValues, mainViewModel: MainViewModel, on
 //            SubjectCard(painter = painterResource(id = R.drawable.mathsmol), subjectName = "Math")
 //            Spacer(modifier = Modifier.height(16.dp))
 //        }
+
 
     }
 }
