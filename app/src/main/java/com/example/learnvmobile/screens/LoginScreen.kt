@@ -84,7 +84,8 @@ fun LoginScreen(
         .fillMaxSize()
         .padding(horizontal = 20.dp)
         .imePadding(),
-        verticalArrangement = Arrangement.SpaceEvenly
+        verticalArrangement = Arrangement.SpaceEvenly,
+
     ) {
         Column {
             Image(

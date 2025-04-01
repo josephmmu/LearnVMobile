@@ -58,10 +58,7 @@ fun HomeScreen(
     onCourseSelected: (String) -> Unit,
     onBack:() -> Unit // Make it logout
 ) {
-
     LaunchedEffect(Unit) {mainViewModel.loadCourses()}
-
-
 
     // for Navigation drawer
     val drawerState = rememberDrawerState(
@@ -107,7 +104,6 @@ fun HomeScreen(
                         scrollBehavior = scrollBehavior,
                         navController = navController
                     )
-
                 },
                 modifier = Modifier
                     .padding(paddingValues)
@@ -116,9 +112,7 @@ fun HomeScreen(
                 ScreenContent(paddingValues, mainViewModel, onCourseSelected)
             }
         }// end of ModalNavigationDrawer
-
     }
-
 }
 
 
@@ -148,16 +142,9 @@ fun ScreenContent(paddingValues: PaddingValues, mainViewModel: MainViewModel, on
             }
         }
 
-
-
 //        item {
 //            // Put the subject cards here
 //            SubjectCard(painter = painterResource(id = R.drawable.mathsmol), subjectName = "Math")
-//            Spacer(modifier = Modifier.height(16.dp))
-//        }
-//        item {
-//            // Put the subject cards here
-//            SubjectCard(painter = painterResource(id = R.drawable.pesmol), subjectName = "PE")
 //            Spacer(modifier = Modifier.height(16.dp))
 //        }
 

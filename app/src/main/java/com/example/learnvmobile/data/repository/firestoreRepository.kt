@@ -13,67 +13,50 @@ class firestoreRepository @Inject constructor(
     private val firestore: FirebaseFirestore
 ){
     fun saveUserProgress(userId:String, progress: UserProgress) {
-        val docRef = firestore.collection("users")
+        val data = hashMapOf(
+            "userId" to progress.userId,
+            "courseId" to progress.courseId,
+            "currentLessonId" to progress.currentLessonId,
+            "isCompleted" to progress.isCompleted,
+            "progressPercentage" to progress.progressPercentage
+        )
+
+        firestore.collection("users")
             .document(userId)
             .collection("progress")
             .document(progress.courseId)
+            .set(data)
+            .addOnFailureListener { e ->
+                Log.e("Firestore", "Error saving progress", e)
+            }
 
-        docRef.set(progress)
-
-
-//        db.collection("users").document(userId)
-//            .collection("courses").document(progress.courseId)
-//            .set(progress)
-//            .addOnSuccessListener { Log.d("FirestoreUserProgress", "Progress Saved!") }
-//            .addOnFailureListener { Log.e("FirestoreUserProgress", "Error Saving Progress", it)}
 
     }
 
     fun getUserProgress(userId: String, courseId: String, onComplete: (UserProgress?) -> Unit) {
-        val docRef = firestore.collection("users")
+        firestore.collection("users")
             .document(userId)
             .collection("progress")
             .document(courseId)
-
-        docRef.get().addOnSuccessListener { document ->
-            if (document.exists()) {
-                onComplete(document.toObject(UserProgress::class.java))
-            } else {
+            .get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val progress = UserProgress(
+                        id = 0,
+                        userId = document.getLong("userId")?.toInt() ?:0,
+                        courseId = document.getString("courseId") ?: "",
+                        currentLessonId = document.getString("currentLesson") ?: "",
+                        isCompleted = document.getBoolean("isCompleted") ?: false,
+                        progressPercentage = document.getDouble("progressPercentage")?.toFloat() ?: 0f
+                     )
+                    onComplete(progress)
+                } else {
+                    onComplete(null)
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("Firestore", "Error fetching progress", e)
                 onComplete(null)
             }
-        }
-
-//        db.collection("users").document(userId)
-//            .get()
-//            .addOnSuccessListener { document ->
-//                if (document.exists()) {
-//                    val progress = document.toObject(UserProgress::class.java)
-//                    onResult(progress)
-//                } else {
-//                    onResult(null)
-//                }
-//            }
-//            .addOnFailureListener { onResult(null) }
     }
-
-//    fun getCourses(onResult: (List<Course>) -> Unit) {
-//        db.collection("courses")
-//            .get()
-//            .addOnSuccessListener { result ->
-//                val courses = result.documents.mapNotNull { it.toObject(Course::class.java) }
-//                onResult(courses)
-//            }
-//    }
-//
-//    fun getLessons(courseId: String, onResult: (List<Lesson>) -> Unit) {
-//        db.collection("courses").document(courseId)
-//            .collection("lessons")
-//            .get()
-//            .addOnSuccessListener { result ->
-//                val lessons = result.documents.mapNotNull { it.toObject(Lesson::class.java) }
-//                onResult(lessons)
-//            }
-//    }
-
-
 }

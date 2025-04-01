@@ -77,7 +77,6 @@ class MainViewModel @Inject constructor(
 
                 val existingUser = repository.getUserByEmail(email)
 
-
                 if (existingUser != null) {
                     println("User already exists in Room: ${existingUser.id}")
                     this@MainViewModel.user = existingUser
@@ -119,10 +118,6 @@ class MainViewModel @Inject constructor(
 //                    )
 
                 }
-
-
-
-
 
             } else {
                 onUserExists()
@@ -212,9 +207,13 @@ class MainViewModel @Inject constructor(
 
     fun loadUserProgress(userId: Int, courseId: String) {
         viewModelScope.launch {
+            Log.d("MainViewModel", "Fetching user progress for userId: $userId, courseId: $courseId")
+
             val localProgress = userProgressRepository.getUserProgress(userId, courseId)
+            Log.d("MainViewModel", "Fetched Progress List: $localProgress")
             firestoreRepository.getUserProgress(userId.toString(), courseId) { remoteProgress ->
                 if (remoteProgress != null) {
+                    Log.d("MainViewModel", "FOUND IT Progress Map Inserting now: $remoteProgress")
                     viewModelScope.launch {
                         userProgressRepository.insertProgress(remoteProgress)
                     }

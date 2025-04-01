@@ -7,6 +7,7 @@ import androidx.room.ForeignKey.Companion.CASCADE
 import androidx.room.PrimaryKey
 
 @Entity(
+    //tableName = "user_progress",
     foreignKeys = [ForeignKey(
         entity = User::class,
         parentColumns = ["id"],
@@ -17,11 +18,11 @@ import androidx.room.PrimaryKey
 data class UserProgress(
 
     @PrimaryKey(autoGenerate = true)
-    val id: Int,
+    val id: Int = 0,
     @ColumnInfo(name = "userId")
-    val userId: Int,  // Ensure this matches User entity ID type
+    val userId: Int = 0,  // Ensure this matches User entity ID type
     @ColumnInfo(name = "courseId")
-    val courseId: String,
+    val courseId: String = "",
     @ColumnInfo(name = "currentLessonId")
     val currentLessonId: String,
     @ColumnInfo(name = "isCompleted")

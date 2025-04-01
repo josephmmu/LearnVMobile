@@ -52,24 +52,30 @@ fun AppNavigation(mainViewModel: MainViewModel) {
 
         composable(
             route = "${Screen.HomeScreen.name}/{userId}",
-            arguments = listOf(navArgument("userId") {
+            arguments = listOf(
+                navArgument("userId") {
                 type = NavType.IntType
             })
         ) {
                 navBackStackEntry ->
-            navBackStackEntry.arguments?.getInt("userId").let{ id->
-                HomeScreen (userId = id!!,
+            val userId = navBackStackEntry.arguments?.getInt("userId") ?: return@composable
+
+                HomeScreen (userId = userId,
                     mainViewModel = mainViewModel,
                     navController = navController,
                     onBack = {navController.popBackStack()},
                     onCourseSelected = { courseId ->
-                        navController.navigate("${Screen.LessonScreen.name}/$id/$courseId")
+                        navController.navigate("${Screen.LessonScreen.name}/$userId/$courseId")
                     })
-            }
+
         }
 
         composable(
-            route = "${Screen.LessonScreen.name}/{userId}/{courseId}"
+            route = "${Screen.LessonScreen.name}/{userId}/{courseId}",
+            arguments = listOf(
+                navArgument("userId") {type = NavType.IntType},
+                navArgument("courseId") {type = NavType.StringType}
+            )
         ) { backStackEntry ->
             val userId = backStackEntry.arguments?.getInt("userId") ?: return@composable
             val courseId = backStackEntry.arguments?.getString("courseId") ?: return@composable
